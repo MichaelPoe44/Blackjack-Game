@@ -13,7 +13,16 @@ class Go{
 
 }
 
-
+/* TODO
+ * add betting
+ * money handling
+ * add user tracking
+ * add split funciton
+ * add hints
+ * 
+ * 
+ * 
+ */
 
 
 
@@ -51,9 +60,10 @@ class Blackjack {
         }
 
     }
-    
+    // game
     ArrayList<Card> deck;
     Random random = new Random();
+    int playerBet;
 
     //make player
     Player user = new Player("Michael Poe", 600);
@@ -143,6 +153,7 @@ class Blackjack {
     JPanel buttonPanel = new JPanel();
     JButton hitButton = new JButton("Hit");
     JButton standButton = new JButton("Stand");
+    JButton doubleButton = new JButton("Double");
     JPanel userPanel = new JPanel();
     JLabel nameLabel = new JLabel(user.Username);
     JLabel moneyLabel = new JLabel("$"+String.valueOf(user.money));
@@ -171,6 +182,8 @@ class Blackjack {
         buttonPanel.add(hitButton);
         standButton.setFocusable(false);
         buttonPanel.add(standButton);
+        doubleButton.setFocusable(false);
+        buttonPanel.add(doubleButton);
         frame.add(buttonPanel, BorderLayout.SOUTH);
 
         hitButton.addActionListener(new ActionListener() {
@@ -178,29 +191,36 @@ class Blackjack {
                 Card card = deck.removeLast();
                 playerSum += card.getValue();
                 playerAceCount += card.isAce() ? 1 : 0;
-                playerHand .add(card);
+                playerHand.add(card);
                 gamePanel.repaint();
-                if (reducePlayerAce() >  21){
-                    hitButton.setEnabled(false);
+                if (reducePlayerAce() >=  21){
+                    endGame();
                 }
+            }
+        });
+
+        doubleButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e){
+                endGame();
+
+                Card card = deck.removeLast();
+                playerSum += card.getValue();
+                playerAceCount += card.isAce()? 1 : 0;
+                playerHand.add(card);
+                gamePanel.repaint();
+                
             }
         });
 
         standButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e){
-                hitButton.setEnabled(false);
-                standButton.setEnabled(false);
+                endGame();
 
-                while (dealerSum < 17){
-                    Card card = deck.removeLast();
-                    dealerSum += card.getValue();
-                    dealerAceCount += card.isAce() ? 1 : 0;
-                    dealerHand.add(card);
-                }
                 gamePanel.repaint();
             }
         });
         gamePanel.repaint();
+
 
         userPanel.setLayout(new BoxLayout(userPanel,BoxLayout.Y_AXIS));
         userPanel.add(nameLabel);
@@ -236,10 +256,7 @@ class Blackjack {
         dealerAceCount += card.isAce() ? 1 : 0;
         dealerHand.add(card);
 
-        System.out.println("Dealer Hand");
-        System.out.println(dealerHand);
-        System.out.println(hiddenCard);
-
+    
         //player
         playerHand = new ArrayList<Card>();
         playerAceCount = 0;
@@ -251,12 +268,6 @@ class Blackjack {
             playerAceCount += card.isAce() ? 1 : 0;
             playerHand.add(card);
         }
-
-        System.out.println("PLayer Hand");
-        System.out.println(playerHand);
- 
-
-
 
     }
 
@@ -271,8 +282,6 @@ class Blackjack {
             }
         }
 
-        System.out.println("Built deck");
-        System.out.println(deck);
     }
 
 
@@ -287,8 +296,6 @@ class Blackjack {
             
         }
 
-        System.out.println("Shuffled deck");
-        System.out.println(deck);
     }
 
     
@@ -309,7 +316,17 @@ class Blackjack {
         return dealerSum;
     }
 
-
+    public void endGame(){
+        hitButton.setEnabled(false);
+        standButton.setEnabled(false);
+        doubleButton.setEnabled(false);
+        while (dealerSum < 17){
+            Card card = deck.removeLast();
+            dealerSum += card.getValue();
+            dealerAceCount += card.isAce() ? 1 : 0;
+            dealerHand.add(card);
+        }
+    }
 
 
 }
