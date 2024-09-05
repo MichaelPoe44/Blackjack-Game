@@ -60,10 +60,18 @@ class Blackjack {
         }
 
     }
+
+    // Game states
+    private enum STATE{
+        GAME,
+        MENU
+    }
+    STATE state = STATE.MENU;
+
     // game
     ArrayList<Card> deck;
     Random random = new Random();
-    int playerBet;
+    int playerBet = 0;
 
     //make player
     Player user = new Player("Michael Poe", 600);
@@ -79,7 +87,7 @@ class Blackjack {
     int playerSum;
     int playerAceCount;
 
-    //frame
+    // game frame
     JFrame frame = new JFrame("BlackJack");
     int boardSize = 700;
     int cardHeight = 154;
@@ -150,6 +158,34 @@ class Blackjack {
             }
         }
     };
+
+    JPanel bettingPanel = new JPanel(){
+        @Override
+        public void paintComponent(Graphics g){
+            super.paintComponent(g);
+
+            try{
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("Arial",Font.PLAIN, 15));
+                g.drawString(user.Username, 5,15);
+                g.setFont(new Font("Arial",Font.PLAIN, 30));
+                g.drawString("Your Bank:    "+String.valueOf(user.money), 50, 100);
+                g.drawString("Bet Amount:   "+String.valueOf(playerBet),50,200);
+
+
+
+
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+
+
+        }
+    };
+
+
+    //game buttons/ panels
     JPanel buttonPanel = new JPanel();
     JButton hitButton = new JButton("Hit");
     JButton standButton = new JButton("Stand");
@@ -158,14 +194,22 @@ class Blackjack {
     JLabel nameLabel = new JLabel(user.Username);
     JLabel moneyLabel = new JLabel("$"+String.valueOf(user.money));
 
+    //menu buttons/ panels
+    JButton oneButton = new JButton("1");
+    JButton fiveButton = new JButton("5");
+    JButton tenButton = new JButton("10");
+    JButton twentyFiveButton = new JButton("25");
+    JButton oneHundredButton = new JButton("100");
 
 
     public Blackjack(){
+        
+        
         startGame();  
-
         makeFrame();
         frame.setVisible(true);
     }
+
 
     
     public void makeFrame(){
@@ -174,58 +218,72 @@ class Blackjack {
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        gamePanel.setLayout(new BorderLayout());
-        gamePanel.setBackground(new Color(53,101,77));
-        frame.add(gamePanel);
+        if (state == STATE.GAME){
+            gamePanel.setLayout(new BorderLayout());
+            gamePanel.setBackground(new Color(53,101,77));
+            frame.add(gamePanel);
 
-        hitButton.setFocusable(false);
-        buttonPanel.add(hitButton);
-        standButton.setFocusable(false);
-        buttonPanel.add(standButton);
-        doubleButton.setFocusable(false);
-        buttonPanel.add(doubleButton);
-        frame.add(buttonPanel, BorderLayout.SOUTH);
+            hitButton.setFocusable(false);
+            buttonPanel.add(hitButton);
+            standButton.setFocusable(false);
+            buttonPanel.add(standButton);
+            doubleButton.setFocusable(false);
+            buttonPanel.add(doubleButton);
+            frame.add(buttonPanel, BorderLayout.SOUTH);
 
-        hitButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e){
-                Card card = deck.removeLast();
-                playerSum += card.getValue();
-                playerAceCount += card.isAce() ? 1 : 0;
-                playerHand.add(card);
-                gamePanel.repaint();
-                if (reducePlayerAce() >=  21){
-                    endGame();
+            hitButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e){
+                    Card card = deck.removeLast();
+                    playerSum += card.getValue();
+                    playerAceCount += card.isAce() ? 1 : 0;
+                    playerHand.add(card);
+                    gamePanel.repaint();
+                    if (reducePlayerAce() >=  21){
+                        endGame();
+                    }
                 }
-            }
-        });
+            });
 
-        doubleButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e){
-                endGame();
+            doubleButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e){
+                    endGame();
 
-                Card card = deck.removeLast();
-                playerSum += card.getValue();
-                playerAceCount += card.isAce()? 1 : 0;
-                playerHand.add(card);
-                gamePanel.repaint();
-                
-            }
-        });
+                    Card card = deck.removeLast();
+                    playerSum += card.getValue();
+                    playerAceCount += card.isAce()? 1 : 0;
+                    playerHand.add(card);
+                    gamePanel.repaint();
+                    
+                }
+            });
 
-        standButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e){
-                endGame();
+            standButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e){
+                    endGame();
 
-                gamePanel.repaint();
-            }
-        });
-        gamePanel.repaint();
+                    gamePanel.repaint();
+                }
+            });
+            gamePanel.repaint();
 
 
-        userPanel.setLayout(new BoxLayout(userPanel,BoxLayout.Y_AXIS));
-        userPanel.add(nameLabel);
-        userPanel.add(moneyLabel);
-        frame.add(userPanel,BorderLayout.EAST);
+            userPanel.setLayout(new BoxLayout(userPanel,BoxLayout.Y_AXIS));
+            userPanel.add(nameLabel);
+            userPanel.add(moneyLabel);
+            frame.add(userPanel,BorderLayout.EAST);
+        }
+
+        else if (state == STATE.MENU){
+            bettingPanel.setBackground(new Color(53,101,77));
+            frame.add(bettingPanel);
+
+            oneButton.setFocusable(false);
+            oneButton.setBounds(20,600,50,50);
+            bettingPanel.add(oneButton);
+
+
+
+        }
     }
 
 
