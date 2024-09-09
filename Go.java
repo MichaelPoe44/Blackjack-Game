@@ -14,8 +14,8 @@ class Go{
 }
 
 /* TODO
- * add betting
- * money handling
+ * add betting//
+ * money handling//
  * add user tracking
  * add split funciton
  * add hints
@@ -47,6 +47,17 @@ class Blackjack {
             return Integer.parseInt(face);
         }
 
+        public int getFace(){
+            if (face.equals("A")){
+                return 1;
+            }
+            else if ("TJQK".contains(face)){
+                return 10;
+            }
+            return Integer.valueOf(face);
+
+        }
+
         public boolean isAce(){
             return face == "A";
         }
@@ -61,12 +72,7 @@ class Blackjack {
 
     }
 
-    // Game states
-    private enum STATE{
-        GAME,
-        MENU
-    }
-    STATE state = STATE.MENU;
+    
 
     // game
     ArrayList<Card> deck;
@@ -74,7 +80,11 @@ class Blackjack {
     int playerBet = 0;
 
     //make player
-    Player user = new Player("Michael Poe", 600);
+    Player user = new Player("Michael Poe", 10000);
+
+    //make hint solver
+    Solver hint = new Solver();
+    String hintString;
 
     //dealer
     ArrayList<Card> dealerHand;
@@ -92,6 +102,14 @@ class Blackjack {
     int boardSize = 700;
     int cardHeight = 154;
     int cardWidth = 110;
+    // main panel to use card layout
+    JPanel mainPanel;
+    CardLayout cardLayout = new CardLayout();
+
+
+
+
+    // game and bet panel creating
     JPanel gamePanel = new JPanel() {
         @Override
         public void paintComponent(Graphics g){
@@ -118,11 +136,14 @@ class Blackjack {
                     Image CardIMG = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
                     g.drawImage(CardIMG, 20 + (cardWidth + 5)*i, 370, cardWidth, cardHeight, null);
                 }
+                //draw players total
                 String sum = String.valueOf(reducePlayerAce());
                 g.setFont(new Font("Arial",Font.PLAIN, 30));
                 g.setColor(Color.WHITE);
                 g.drawString(sum,20,565);
 
+                //draw hint
+                g.drawString(hintString,200,565);
                 
                 // draw outcome
                 if (!standButton.isEnabled()){
@@ -132,18 +153,23 @@ class Blackjack {
                     String message = "";
                     if (playerSum > 21){
                         message = "Player Bust!";
+                        results(false,false);
                     }
                     else if (dealerSum > 21){
                         message = "You Win";
+                        results(true,false);
                     }
                     else if (playerSum == dealerSum){
                         message = "Tie";
+                        results(false,true);
                     }
                     else if (dealerSum < playerSum){
                         message = "You Win";
+                        results(true,false);
                     }
                     else if (playerSum < dealerSum){
                         message = "You Lose";
+                        results(false,false);
                     }
 
                     sum = String.valueOf(reduceDealerAce());
@@ -190,18 +216,33 @@ class Blackjack {
     JButton hitButton = new JButton("Hit");
     JButton standButton = new JButton("Stand");
     JButton doubleButton = new JButton("Double");
+    JButton playAgainButton = new JButton("Play Again");
+    JButton hintButton = new JButton("Hint");
     JPanel userPanel = new JPanel();
     JLabel nameLabel = new JLabel(user.Username);
-    JLabel moneyLabel = new JLabel("$"+String.valueOf(user.money));
+    JLabel moneyLabel = new JLabel("Bank: $"+String.valueOf(user.money));
+    JLabel currentBet = new JLabel("Current Bet: $"+String.valueOf(playerBet));
 
     //menu buttons/ panels
-    JButton oneButton = new JButton("1");
-    JButton fiveButton = new JButton("5");
-    JButton tenButton = new JButton("10");
-    JButton twentyFiveButton = new JButton("25");
-    JButton oneHundredButton = new JButton("100");
+    JButton playButton = new JButton("Play");
+    JButton resetButton = new JButton("reset");
+    JButton oneButton = new JButton("$1");
+    JButton fiveButton = new JButton("$5");
+    JButton tenButton = new JButton("$10");
+    JButton twentyFiveButton = new JButton("$25");
+    JButton oneHundredButton = new JButton("$100");
+    ActionListener betListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e){
+            
+            int value = Integer.valueOf(e.getActionCommand());
+            if ((playerBet + value) <= user.money){
+                playerBet += value;
+            }   
+            bettingPanel.repaint();
+        }
+    };
 
-
+    //////// constructor//////////////////////////
     public Blackjack(){
         
         
@@ -216,36 +257,56 @@ class Blackjack {
 
         frame.setSize(boardSize,boardSize);
         frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);     
+        
+        mainPanel = new JPanel(cardLayout);
+        frame.add(mainPanel);
 
-        if (state == STATE.GAME){
-            gamePanel.setLayout(new BorderLayout());
-            gamePanel.setBackground(new Color(53,101,77));
-            frame.add(gamePanel);
+        makeGamePanel();
+        makeBettingPanel();
+        
+        cardLayout.show(mainPanel, "betting");
+        
+    }
 
-            hitButton.setFocusable(false);
-            buttonPanel.add(hitButton);
-            standButton.setFocusable(false);
-            buttonPanel.add(standButton);
-            doubleButton.setFocusable(false);
-            buttonPanel.add(doubleButton);
-            frame.add(buttonPanel, BorderLayout.SOUTH);
 
-            hitButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e){
-                    Card card = deck.removeLast();
-                    playerSum += card.getValue();
-                    playerAceCount += card.isAce() ? 1 : 0;
-                    playerHand.add(card);
-                    gamePanel.repaint();
-                    if (reducePlayerAce() >=  21){
-                        endGame();
-                    }
+    public void makeGamePanel(){
+        gamePanel.setLayout(new BorderLayout());
+        gamePanel.setBackground(new Color(53,101,77));
+        mainPanel.add(gamePanel, "game");
+        
+
+        hitButton.setFocusable(false);
+        standButton.setFocusable(false);
+        doubleButton.setFocusable(false);
+
+        buttonPanel.add(hintButton);
+        buttonPanel.add(hitButton);
+        buttonPanel.add(standButton);
+        buttonPanel.add(doubleButton);
+        buttonPanel.add(playAgainButton);
+        playAgainButton.setVisible(false);
+        gamePanel.add(buttonPanel, BorderLayout.SOUTH);
+
+
+        hitButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e){
+                Card card = deck.removeLast();
+                playerSum += card.getValue();
+                playerAceCount += card.isAce() ? 1 : 0;
+                playerHand.add(card);
+                gamePanel.repaint();
+                hintButton.setEnabled(false);
+                if (reducePlayerAce() >=  21){
+                    endGame();
                 }
-            });
+            }
+        });
 
             doubleButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e){
+
+
                     endGame();
 
                     Card card = deck.removeLast();
@@ -253,7 +314,7 @@ class Blackjack {
                     playerAceCount += card.isAce()? 1 : 0;
                     playerHand.add(card);
                     gamePanel.repaint();
-                    
+
                 }
             });
 
@@ -264,32 +325,107 @@ class Blackjack {
                     gamePanel.repaint();
                 }
             });
-            gamePanel.repaint();
+            
+            playAgainButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e){
+                    hitButton.setEnabled(true);
+                    standButton.setEnabled(true);
+                    doubleButton.setEnabled(true);
+                    hintButton.setEnabled(true);
+                    playAgainButton.setVisible(false);
+                    startGame();
+                    gamePanel.repaint();
+                    cardLayout.show(mainPanel, "betting");
+                    
+                }
+            });
+            
+            hintButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e){
+                    int dealer = dealerHand.get(0).getFace();
+                    int[] player = {playerHand.get(0).getFace(), playerHand.get(1).getFace()};
+                    hintString = hint.process(dealer, player);
+                    hintButton.setEnabled(false);
+                    gamePanel.repaint();
+                }
+            });
+
+
 
 
             userPanel.setLayout(new BoxLayout(userPanel,BoxLayout.Y_AXIS));
             userPanel.add(nameLabel);
             userPanel.add(moneyLabel);
-            frame.add(userPanel,BorderLayout.EAST);
-        }
-
-        else if (state == STATE.MENU){
-            bettingPanel.setBackground(new Color(53,101,77));
-            frame.add(bettingPanel);
-
-            oneButton.setFocusable(false);
-            oneButton.setBounds(20,600,50,50);
-            bettingPanel.add(oneButton);
-
-
-
-        }
+            userPanel.add(currentBet);
+            gamePanel.add(userPanel,BorderLayout.EAST);
+            gamePanel.repaint();
     }
 
 
 
+    public void makeBettingPanel(){
+        bettingPanel.setBackground(new Color(53,101,77));
+        bettingPanel.setLayout(null);
+        mainPanel.add(bettingPanel, "betting");
+
+        playButton.setFocusable(false);
+        playButton.setBounds(500,150,100,100);
+        playButton.setFont(new Font("Arial",Font.PLAIN, 35));
+        playButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e){
+                betMade();
+                if ((playerBet * 2) > user.money){
+                    doubleButton.setEnabled(false);
+                }
+                cardLayout.show(mainPanel,"game");
+
+            }
+        });
+        bettingPanel.add(playButton);
+
+        resetButton.setFocusable(false);
+        resetButton.setBounds(350,450,70,70);
+        bettingPanel.add(resetButton);
+        resetButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e){
+                playerBet = 0;
+                bettingPanel.repaint();
+            }
+        });
 
 
+        oneButton.setFocusable(false);
+        oneButton.setBounds(150,350, 70,70);
+        bettingPanel.add(oneButton);
+
+        fiveButton.setFocusable(false);
+        fiveButton.setBounds(250,350,70,70);
+        bettingPanel.add(fiveButton);
+
+        tenButton.setFocusable(false);
+        tenButton.setBounds(350,350,70,70);
+        bettingPanel.add(tenButton);
+
+        twentyFiveButton.setFocusable(false);
+        twentyFiveButton.setBounds(150,450,70,70);
+        bettingPanel.add(twentyFiveButton);
+
+        oneHundredButton.setFocusable(false);
+        oneHundredButton.setBounds(250,450,70,70);
+        bettingPanel.add(oneHundredButton);
+
+        oneButton.addActionListener(betListener);
+        fiveButton.addActionListener(betListener);
+        tenButton.addActionListener(betListener);
+        twentyFiveButton.addActionListener(betListener);
+        oneHundredButton.addActionListener(betListener);
+
+        oneButton.setActionCommand("1");
+        fiveButton.setActionCommand("5");
+        tenButton.setActionCommand("10");
+        twentyFiveButton.setActionCommand("25");
+        oneHundredButton.setActionCommand("100");
+    }
 
 
 
@@ -299,6 +435,7 @@ class Blackjack {
     public void startGame(){
         buildDeck();
         shuffleDeck();
+        hintString = "";
 
         //dealer
         dealerHand = new ArrayList<Card>();
@@ -378,6 +515,7 @@ class Blackjack {
         hitButton.setEnabled(false);
         standButton.setEnabled(false);
         doubleButton.setEnabled(false);
+        hintButton.setEnabled(false);
         while (dealerSum < 17){
             Card card = deck.removeLast();
             dealerSum += card.getValue();
@@ -386,7 +524,35 @@ class Blackjack {
         }
     }
 
+    public void handleMoneyLables(){
+        moneyLabel.setText("Bank: $"+String.valueOf(user.money));
+        currentBet.setText("Current Bet: $"+String.valueOf(playerBet));
+    }
 
+    public void betMade(){
+        user.money -= playerBet;
+        handleMoneyLables();
+
+    }
+
+    public void results(boolean win, boolean tie){
+        
+        if (tie){
+            user.money += playerBet;
+            playerBet = 0;
+        }
+        if (win){
+            user.money = user.money + (playerBet * 2);
+            playerBet = 0;
+        }
+        else if (!win){
+            playerBet = 0;
+        }
+        
+        handleMoneyLables();
+        playAgainButton.setVisible(true);
+    
+    }
 }
 
 
