@@ -18,7 +18,7 @@ class Go{
  * money handling//
  * add user tracking
  * add split funciton
- * add hints
+ * add hints//
  * 
  * 
  * 
