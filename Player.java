@@ -1,17 +1,23 @@
 
-//save file
 
 
 class Player{
     String Username;
     int money;
 
-    public Player(String username, int money){
+    public Player(String username){
         this.Username = username;
-        this.money = money;
+        
     }
 
+    public void setMoney(int money){
+        this.money = money;
+    }
 }
+
+
+
+
 
                                               
 

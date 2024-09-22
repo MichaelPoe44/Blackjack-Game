@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.*;
 
-
 import javax.swing.*;
 
 class Go{
@@ -72,7 +71,8 @@ class Blackjack {
 
     }
 
-    
+    // data holder
+    Data data;
 
     // game
     ArrayList<Card> deck;
@@ -80,7 +80,7 @@ class Blackjack {
     int playerBet = 0;
 
     //make player
-    Player user = new Player("Michael Poe", 10000);
+    Player user = new Player("Michael");
 
     //make hint solver
     Solver hint = new Solver();
@@ -102,6 +102,7 @@ class Blackjack {
     int boardSize = 700;
     int cardHeight = 154;
     int cardWidth = 110;
+
     // main panel to use card layout
     JPanel mainPanel;
     CardLayout cardLayout = new CardLayout();
@@ -211,7 +212,7 @@ class Blackjack {
     };
 
 
-    //game buttons/ panels
+    //game buttons/ panels/ labels
     JPanel buttonPanel = new JPanel();
     JButton hitButton = new JButton("Hit");
     JButton standButton = new JButton("Stand");
@@ -245,19 +246,30 @@ class Blackjack {
     //////// constructor//////////////////////////
     public Blackjack(){
         
-        
+        makeFile();
         startGame();  
         makeFrame();
         frame.setVisible(true);
     }
 
 
+    public void makeFile(){
+        data = new Data(user);
+    }
     
     public void makeFrame(){
 
         frame.setSize(boardSize,boardSize);
         frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);     
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e){
+                data.endGame(user);
+            }
+        });
+        
         
         mainPanel = new JPanel(cardLayout);
         frame.add(mainPanel);
@@ -553,6 +565,10 @@ class Blackjack {
         playAgainButton.setVisible(true);
     
     }
+
+
+
+    
 }
 
 

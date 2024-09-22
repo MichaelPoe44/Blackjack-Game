@@ -4,6 +4,8 @@ Player.class
 Blackjack$Card.class
 Blackjack.class
 Solver.class
+Data.class
+data.txt
 
 Blackjack$1.class
 Blackjack$2.class
@@ -15,3 +17,4 @@ Blackjack$7.class
 Blackjack$8.class
 Blackjack$9.class
 Blackjack$10.class
+Blackjack$11.class
