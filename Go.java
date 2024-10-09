@@ -15,7 +15,8 @@ class Go{
 /* TODO
  * add betting//
  * money handling//
- * add user tracking
+ * add user tracking//
+ * Add login screen oops
  * add split funciton
  * add hints//
  * 
@@ -96,12 +97,18 @@ class Blackjack {
     ArrayList<Card> playerHand;
     int playerSum;
     int playerAceCount;
+    ArrayList<Card> secondHand;
+    boolean playingSecondHand;
+    //int secondPlayerSum;
+    //int SecondPlayerAceCount;
 
     // game frame
     JFrame frame = new JFrame("BlackJack");
     int boardSize = 700;
-    int cardHeight = 154;
+    int cardHeight = 154; // ratio is height is 1.4 times width
     int cardWidth = 110;
+    int splitCardHeight = 98;
+    int splitCardWidth = 70;
 
     // main panel to use card layout
     JPanel mainPanel;
@@ -131,21 +138,50 @@ class Blackjack {
                     g.drawImage(CardIMG, cardWidth + 25 + (cardWidth + 5)*i, 70, cardWidth, cardHeight, null);
                 }
 
-                //draw players hand
-                for (int i=0; i < playerHand.size(); i++){
-                    Card card = playerHand.get(i);
-                    Image CardIMG = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
-                    g.drawImage(CardIMG, 20 + (cardWidth + 5)*i, 370, cardWidth, cardHeight, null);
+                String sum;
+                //draw players hand if no split
+                if (secondHand.isEmpty()){
+
+                    
+                    for (int i=0; i < playerHand.size(); i++){
+                        Card card = playerHand.get(i);
+                        Image CardIMG = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
+                        g.drawImage(CardIMG, 20 + (cardWidth + 5)*i, 370, cardWidth, cardHeight, null);
+                    }
+                    //draw players total
+                    sum = String.valueOf(reducePlayerAce());
+                    g.setFont(new Font("Arial",Font.PLAIN, 30));
+                    g.setColor(Color.WHITE);
+                    g.drawString(sum,20,565);
                 }
-                //draw players total
-                String sum = String.valueOf(reducePlayerAce());
-                g.setFont(new Font("Arial",Font.PLAIN, 30));
-                g.setColor(Color.WHITE);
-                g.drawString(sum,20,565);
+
+                else if (!secondHand.isEmpty()){
+                    for (int i=0; i < playerHand.size(); i++){
+                        Card card = playerHand.get(i);
+                        Image CardIMG = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
+                        g.drawImage(CardIMG, 20 + (splitCardWidth + 5)*i, 320, splitCardWidth, splitCardHeight, null);
+                    }
+
+                    for (int i=0; i < secondHand.size(); i++){
+                        Card card = secondHand.get(i);
+                        Image CardIMG = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
+                        g.drawImage(CardIMG, 20 + (splitCardWidth + 5)*i, 430, splitCardWidth, splitCardHeight, null);
+                    }
+                    //draw players total
+                    sum = String.valueOf(reducePlayerAce());
+                    g.setFont(new Font("Arial",Font.PLAIN, 30));
+                    g.setColor(Color.WHITE);
+                    g.drawString("Top hand:", 20, 565);
+                    g.drawString(">",0,380);
+                    g.drawString(sum,170,565);
+                }
+
 
                 //draw hint
-                g.drawString(hintString,200,565);
-                
+                if (!hintString.isEmpty()){
+                    g.drawString(hintString,200,565);
+                    hintString = "";
+                }
                 // draw outcome
                 if (!standButton.isEnabled()){
                     dealerSum = reduceDealerAce();
@@ -219,6 +255,7 @@ class Blackjack {
     JButton doubleButton = new JButton("Double");
     JButton playAgainButton = new JButton("Play Again");
     JButton hintButton = new JButton("Hint");
+    JButton splitButton = new JButton("Split");
     JPanel userPanel = new JPanel();
     JLabel nameLabel = new JLabel(user.Username);
     JLabel moneyLabel = new JLabel("Bank: $"+String.valueOf(user.money));
@@ -289,6 +326,7 @@ class Blackjack {
         
 
         hitButton.setFocusable(false);
+        hintButton.setFocusable(false);
         standButton.setFocusable(false);
         doubleButton.setFocusable(false);
 
@@ -296,6 +334,7 @@ class Blackjack {
         buttonPanel.add(hitButton);
         buttonPanel.add(standButton);
         buttonPanel.add(doubleButton);
+        buttonPanel.add(splitButton);
         buttonPanel.add(playAgainButton);
         playAgainButton.setVisible(false);
         gamePanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -309,11 +348,13 @@ class Blackjack {
                 playerHand.add(card);
                 gamePanel.repaint();
                 hintButton.setEnabled(false);
+                splitButton.setEnabled(false);
+                
                 if (reducePlayerAce() >=  21){
                     endGame();
                 }
             }
-        });
+        }); 
 
             doubleButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e){
@@ -332,7 +373,14 @@ class Blackjack {
 
             standButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e){
-                    endGame();
+                    if (!secondHand.isEmpty() && !playingSecondHand){
+                        //switch player hand and secondary hand
+                        playingSecondHand = true;
+                    }
+                    else {
+                        endGame();
+                    }
+                    
 
                     gamePanel.repaint();
                 }
@@ -344,7 +392,11 @@ class Blackjack {
                     standButton.setEnabled(true);
                     doubleButton.setEnabled(true);
                     hintButton.setEnabled(true);
+                    splitButton.setEnabled(true);
                     playAgainButton.setVisible(false);
+                    if (!secondHand.isEmpty()){
+                        secondHand.clear();
+                    }
                     startGame();
                     gamePanel.repaint();
                     cardLayout.show(mainPanel, "betting");
@@ -357,7 +409,35 @@ class Blackjack {
                     int dealer = dealerHand.get(0).getFace();
                     int[] player = {playerHand.get(0).getFace(), playerHand.get(1).getFace()};
                     hintString = hint.process(dealer, player);
+                    /////
+                    System.out.println(String.format("D: %d", dealer));
+                    System.out.println(player[0]);
+                    System.out.println(player[1]);
                     hintButton.setEnabled(false);
+                    gamePanel.repaint();
+                }
+            });
+
+            splitButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e){
+
+                    
+                    Card card = playerHand.removeLast();
+                    playerSum -= card.getValue();
+                    playerAceCount -= card.isAce()? 1 : 0;
+                    secondHand.add(card);
+
+                    card = deck.getLast();
+                    playerSum += card.getValue();
+                    playerAceCount += card.isAce()? 1 : 0;
+                    playerHand.add(card);
+
+                    card = deck.getLast();
+                    //playerSum += card.getValue;
+                    //playerAceCount += card.isAce()? 1 : 0;
+                    secondHand.add(card);
+
+                    splitButton.setEnabled(false);
                     gamePanel.repaint();
                 }
             });
@@ -445,6 +525,7 @@ class Blackjack {
 
 
     public void startGame(){
+        
         buildDeck();
         shuffleDeck();
         hintString = "";
@@ -468,6 +549,10 @@ class Blackjack {
         playerHand = new ArrayList<Card>();
         playerAceCount = 0;
         playerSum = 0;
+
+        //for if a split occurs 
+        secondHand = new ArrayList<Card>();
+        playingSecondHand = false;
 
         for (int i=0; i < 2; i++){
             card = deck.removeLast();
@@ -528,6 +613,7 @@ class Blackjack {
         standButton.setEnabled(false);
         doubleButton.setEnabled(false);
         hintButton.setEnabled(false);
+        splitButton.setEnabled(false);
         while (dealerSum < 17){
             Card card = deck.removeLast();
             dealerSum += card.getValue();
@@ -551,15 +637,16 @@ class Blackjack {
         
         if (tie){
             user.money += playerBet;
-            playerBet = 0;
         }
-        if (win){
+        else if (win){
             user.money = user.money + (playerBet * 2);
+        }
+
+        if (secondHand == null){
+            System.out.println("no second hand detected");
             playerBet = 0;
         }
-        else if (!win){
-            playerBet = 0;
-        }
+        
         
         handleMoneyLables();
         playAgainButton.setVisible(true);

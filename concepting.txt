@@ -1,0 +1,16 @@
+
+
+How to do split function
+
+1. need a split button
+2. when split button is pushed another player hand is made
+    - one card stays in first player hand
+    - other card is placed in second player hand
+    
+3. a card gets drawn out of deck and placed in second hand
+4. a card gets drawn and placed in first hand
+5. add a condition to the drawing that if (!secondhand) it draws the player cards like normal 
+                                        if (secondhand) it makes the cards smaller and places them next to each other
+
+6. second hand is placed on the right and played to completion first.
+7. if hand wins the bet will do nothing. if it wins will be doubled like normal
