@@ -80,7 +80,7 @@ class Blackjack {
     int playerBet = 0;
 
     //make player
-    Player user = new Player("Michael");
+    Player user;
 
     //make hint solver
     Solver hint = new Solver();
@@ -211,6 +211,8 @@ class Blackjack {
         }
     };
 
+    JPanel loginPanel = new JPanel();
+
 
     //game buttons/ panels/ labels
     JPanel buttonPanel = new JPanel();
@@ -274,10 +276,11 @@ class Blackjack {
         mainPanel = new JPanel(cardLayout);
         frame.add(mainPanel);
 
+        makeLoginPanel();
         makeGamePanel();
         makeBettingPanel();
         
-        cardLayout.show(mainPanel, "betting");
+        cardLayout.show(mainPanel, "login");
         
     }
 
@@ -439,6 +442,60 @@ class Blackjack {
         oneHundredButton.setActionCommand("100");
     }
 
+    public void makeLoginPanel(){
+
+        loginPanel.setBackground(new Color(53,101,77));
+        loginPanel.setLayout(null);
+        mainPanel.add(loginPanel, "login");
+
+        JTextField name = new JTextField("username");
+        name.setForeground(new Color(128, 128, 128));
+        name.setBounds(200,200,100,50);
+        loginPanel.add(name);
+
+        JButton newUser = new JButton("New User");
+        newUser.setBounds(200,320,100,40);
+        loginPanel.add(newUser);
+        newUser.addActionListener(new ActionListener() {
+            public void actionPerformed (ActionEvent e){
+                System.out.println("pressed");
+                cardLayout.show(mainPanel,"betting");
+            }
+        });
+
+        JButton loginButton = new JButton("Login");
+        loginButton.setBounds(200,270,100,40);
+        loginPanel.add(loginButton);
+        loginButton.addActionListener(new ActionListener() {
+            public void actionPerformed (ActionEvent e){
+
+                //see if user is in file 
+                // if is in file Initialize player
+                //go to betting
+                user = new Player("Michael");
+                //if name not in file 
+                //try again
+
+
+
+
+
+                cardLayout.show(mainPanel,"betting");
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+    }
 
 
 

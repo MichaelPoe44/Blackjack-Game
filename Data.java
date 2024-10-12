@@ -17,7 +17,7 @@ class Data{
     int numberOfUsers = 0;
 
 
-    public Data(Player user){
+    public String Data(Player user){
         try {
             file = new File("data.txt");
             
@@ -87,6 +87,20 @@ class Data{
     }
 
     
+    public void findUser(user){
+
+
+
+
+
+        
+    }
+
+
+
+
+
+
 
     public void deafualt(Player user){
         user.setMoney(500);
