@@ -15,6 +15,7 @@ class Data{
     String allData = "";
     int numberOfUsers = 0;
     int locationOfUser;
+    String message = "closed before user given";
 
 
     public Data(){
@@ -27,6 +28,21 @@ class Data{
                 fr = new FileReader(file);
                 br = new BufferedReader(fr);
                 br.mark(1000);
+                
+        
+
+                while (br.readLine() != null) numberOfUsers++;
+                br.reset();
+
+                //recording all data
+                for (int i=0; i < numberOfUsers; i++){
+
+                    String temp = br.readLine();
+                    allData += temp;
+                    allData += "\n";
+
+                }
+                
             }
         }
         catch (Exception e) {
@@ -40,7 +56,7 @@ class Data{
         //gets number of total users
         try {
                 
-            while (br.readLine() != null) numberOfUsers++;
+            
             br.reset();
             
             
@@ -77,7 +93,7 @@ class Data{
     public void getData(Player user){
         //gets number of total users
         try {
-            
+            allData = "";
             br.reset();
             int lengthOfUsername = user.Username.length();
 
@@ -88,10 +104,6 @@ class Data{
                     
                 
                 if (i == locationOfUser){
-                    System.out.println(temp);
-                    System.out.println(temp.substring(lengthOfUsername+1));
-                    System.out.println("yooooo");
-
                     int money = Integer.valueOf(temp.substring(lengthOfUsername+1));
                     user.setMoney(money);
                 }
@@ -113,9 +125,15 @@ class Data{
     
 
 
-    public void deafualt(Player user){
+
+
+
+
+
+    public void makeNewUser(Player user){
         user.setMoney(500);
     }
+
 
 
 
@@ -129,8 +147,17 @@ class Data{
             fw.close();
 
         }
+        // if window closed before user given
         catch (Exception e){
-            e.printStackTrace();
+            try {
+                fw = new FileWriter(file);
+                System.out.println(message);
+                fw.write(allData);
+                fw.close();
+                
+            } catch (Exception error) {
+                error.printStackTrace();
+            }
         }
         
     }

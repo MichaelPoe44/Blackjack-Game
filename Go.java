@@ -450,28 +450,18 @@ class Blackjack {
 
         JTextField name = new JTextField("username");
         name.setForeground(new Color(128, 128, 128));
-        name.setBounds(200,200,100,50);
+        name.setBounds(200,200,150,60);
         loginPanel.add(name);
 
-        JButton newUser = new JButton("New User");
-        newUser.setBounds(200,320,100,40);
-        loginPanel.add(newUser);
-        newUser.addActionListener(new ActionListener() {
-            public void actionPerformed (ActionEvent e){
-                System.out.println("pressed");
-                cardLayout.show(mainPanel,"betting");
-            }
-        });
-
+    
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(200,270,100,40);
+        loginButton.setBounds(200,280,150,60);
         loginPanel.add(loginButton);
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed (ActionEvent e){
 
                 //reads text field
                 String text = name.getText();
-                System.out.println(text);
 
                 //checks if user is in data
                 if (data.userInFile(text)){
@@ -486,13 +476,24 @@ class Blackjack {
 
 
 
+        JButton newUser = new JButton("Create New User");
+        newUser.setBounds(200,350,150,60);
+        loginPanel.add(newUser);
+        newUser.addActionListener(new ActionListener() {
+            public void actionPerformed (ActionEvent e){
+                //check if user in file already if so say user already in 
+                String text = name.getText();
+                
+                if (!data.userInFile(text)){
+                    user = new Player(text);
+                    data.makeNewUser(user);
+                    cardLayout.show(mainPanel,"betting");
+                }
+                else System.out.println("User alread exists");
+                
 
-
-
-
-
-
-
+            }
+        });
 
 
     }
