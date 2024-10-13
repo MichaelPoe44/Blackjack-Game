@@ -13,11 +13,11 @@ class Data{
     BufferedReader br;
 
     String allData = "";
-    boolean userInFile = false;
     int numberOfUsers = 0;
+    int locationOfUser;
 
 
-    public String Data(Player user){
+    public Data(){
         try {
             file = new File("data.txt");
             
@@ -27,79 +27,90 @@ class Data{
                 fr = new FileReader(file);
                 br = new BufferedReader(fr);
                 br.mark(1000);
-
-                //gets number of total users
-                while (br.readLine() != null) numberOfUsers++;
-                br.reset();
-                
-
-                
-                if (numberOfUsers > 0){
-                    
-                    int lengthOfUsername = user.Username.length();
-
-                    //recording all data that is not the current player and getting money for the current player
-                    for (int i=0; i < numberOfUsers; i++){
-
-                        String temp = br.readLine();
-                        
-                        if (temp.length() >= lengthOfUsername){
-                            if (temp.substring(0,lengthOfUsername).equals(user.Username)){
-
-                                int money = Integer.valueOf(temp.substring(lengthOfUsername+1));
-                                user.setMoney(money);
-                                userInFile = true;
-
-                            }
-                            else{
-                                allData += temp;
-                                allData += "\n";
-
-                            }
-                        }
-                        else {
-                            allData += temp;
-                            allData += "\n";
-                        }
-
-                        
-                    }
-
-
-                }
-                
-                // if player not in list gives them default money
-                if (!userInFile) deafualt(user);
-                
-                
-
             }
-            //if no file give player defualt money
-            else{
-                deafualt(user);
-            }
-            
-
-
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    
-    public void findUser(user){
 
+    //returns if the string is in file so can make the text into a user
+    public boolean userInFile(String text){
+        //gets number of total users
+        try {
+                
+            while (br.readLine() != null) numberOfUsers++;
+            br.reset();
+            
+            
+            if (numberOfUsers > 0){
+                
+                int lengthOfUsername = text.length();
 
+                //recording all data that is not the current player and getting money for the current player
+                for (int i=0; i < numberOfUsers; i++){
 
+                    String temp = br.readLine();
+                    
+                    // makes sure length of current line is longer than username to avoid index error
+                    if (temp.length() >= lengthOfUsername){
+                        if (temp.substring(0,lengthOfUsername).equals(text)){
+                            locationOfUser = i; //records location of user in file
+                            return true;
+                        }
+                        
+                    }
+                }
 
+            }
+        }
 
-        
+        catch(Exception e){
+            e.printStackTrace();
+            
+        }
+        return false;
     }
 
+    
+    public void getData(Player user){
+        //gets number of total users
+        try {
+            
+            br.reset();
+            int lengthOfUsername = user.Username.length();
 
+            //recording all data that is not the current player and getting money for the current player
+            for (int i=0; i < numberOfUsers; i++){
 
+                String temp = br.readLine();
+                    
+                
+                if (i == locationOfUser){
+                    System.out.println(temp);
+                    System.out.println(temp.substring(lengthOfUsername+1));
+                    System.out.println("yooooo");
 
+                    int money = Integer.valueOf(temp.substring(lengthOfUsername+1));
+                    user.setMoney(money);
+                }
 
+                else {
+                    allData += temp;
+                    allData += "\n";
+                }
+                    
+            }
+
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+    }
+    
+    
 
 
     public void deafualt(Player user){

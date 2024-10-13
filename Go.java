@@ -222,8 +222,8 @@ class Blackjack {
     JButton playAgainButton = new JButton("Play Again");
     JButton hintButton = new JButton("Hint");
     JPanel userPanel = new JPanel();
-    JLabel nameLabel = new JLabel(user.Username);
-    JLabel moneyLabel = new JLabel("Bank: $"+String.valueOf(user.money));
+    JLabel nameLabel = new JLabel();
+    JLabel moneyLabel = new JLabel();
     JLabel currentBet = new JLabel("Current Bet: $"+String.valueOf(playerBet));
 
     //menu buttons/ panels
@@ -256,7 +256,7 @@ class Blackjack {
 
 
     public void makeFile(){
-        data = new Data(user);
+        data = new Data();
     }
     
     public void makeFrame(){
@@ -469,18 +469,18 @@ class Blackjack {
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed (ActionEvent e){
 
-                //see if user is in file 
-                // if is in file Initialize player
-                //go to betting
-                user = new Player("Michael");
-                //if name not in file 
-                //try again
+                //reads text field
+                String text = name.getText();
+                System.out.println(text);
 
-
-
-
-
-                cardLayout.show(mainPanel,"betting");
+                //checks if user is in data
+                if (data.userInFile(text)){
+                    user = new Player(text);
+                    data.getData(user);
+                    cardLayout.show(mainPanel, "betting");
+                }
+                else System.out.println("User not Found");
+                 
             }
         });
 
