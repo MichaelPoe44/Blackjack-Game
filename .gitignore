@@ -1,4 +1,6 @@
 .Ds_Store
+.classFiles
+
 Go.class
 Player.class
 Blackjack$Card.class
@@ -20,3 +22,4 @@ Blackjack$10.class
 Blackjack$11.class
 Blackjack$12.class
 Blackjack$13.class
+Blackjack$14.class

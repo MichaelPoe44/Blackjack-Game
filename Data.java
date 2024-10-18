@@ -15,7 +15,6 @@ class Data{
     String allData = "";
     int numberOfUsers = 0;
     int locationOfUser;
-    String message = "closed before user given";
 
 
     public Data(){
@@ -151,7 +150,7 @@ class Data{
         catch (Exception e){
             try {
                 fw = new FileWriter(file);
-                System.out.println(message);
+                System.out.println("closed before user given");
                 fw.write(allData);
                 fw.close();
                 

@@ -211,7 +211,22 @@ class Blackjack {
         }
     };
 
-    JPanel loginPanel = new JPanel();
+
+    String errorMessage = "";
+    JPanel loginPanel = new JPanel(){
+        @Override
+        public void paintComponent(Graphics g){
+            super.paintComponent(g);
+            try {
+                g.setColor(Color.RED);
+                g.setFont(new Font("Arial",Font.PLAIN, 15));
+                g.drawString(errorMessage,205,200);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
 
     //game buttons/ panels/ labels
@@ -469,8 +484,11 @@ class Blackjack {
                     data.getData(user);
                     cardLayout.show(mainPanel, "betting");
                 }
-                else System.out.println("User not Found");
-                 
+                else{
+                    errorMessage = "User not Found";
+                    loginPanel.repaint();
+                } 
+
             }
         });
 
@@ -489,9 +507,11 @@ class Blackjack {
                     data.makeNewUser(user);
                     cardLayout.show(mainPanel,"betting");
                 }
-                else System.out.println("User alread exists");
                 
-
+                else {
+                    errorMessage = "User alread exists";
+                    loginPanel.repaint();
+                }
             }
         });
 
