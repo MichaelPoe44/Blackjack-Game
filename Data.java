@@ -52,6 +52,7 @@ class Data{
 
     //returns if the string is in file so can make the text into a user
     public boolean userInFile(String text){
+        String fullName;
         //gets number of total users
         try {
                 
@@ -71,8 +72,11 @@ class Data{
                     // makes sure length of current line is longer than username to avoid index error
                     if (temp.length() >= lengthOfUsername){
                         if (temp.substring(0,lengthOfUsername).equals(text)){
-                            locationOfUser = i; //records location of user in file
-                            return true;
+                            if (temp.charAt(lengthOfUsername+1) == ' '){
+                                locationOfUser = i; //records location of user in file
+                                return true;
+                            }
+                            
                         }
                         
                     }

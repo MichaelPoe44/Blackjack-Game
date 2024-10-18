@@ -501,17 +501,18 @@ class Blackjack {
             public void actionPerformed (ActionEvent e){
                 //check if user in file already if so say user already in 
                 String text = name.getText();
-                
-                if (!data.userInFile(text)){
-                    user = new Player(text);
-                    data.makeNewUser(user);
-                    cardLayout.show(mainPanel,"betting");
+                if (text.equals("")){
+                    errorMessage = "Invalid Username";
                 }
-                
-                else {
-                    errorMessage = "User alread exists";
-                    loginPanel.repaint();
+                else if (!data.userInFile(text)){
+                        user = new Player(text);
+                        data.makeNewUser(user);
+                        cardLayout.show(mainPanel,"betting");
                 }
+                    
+                else errorMessage = "User alread exists";
+                loginPanel.repaint();
+                
             }
         });
 
